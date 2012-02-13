@@ -60,17 +60,25 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  // Initalize output xml doc
+  // Initalize the output xml document
   TiXmlDocument xmlDocOutput;
-  TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );
+  // Create header declaration line
+  TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf8", "" );
   xmlDocOutput.LinkEndChild(decl);
-  TiXmlElement node("settings");
-  xmlDocOutput.InsertEndChild(node);
-  TiXmlElement nodeSetting("setting");
-  nodeSetting.SetAttribute("id", "idvalue");
-  nodeSetting.SetAttribute("value", "idvalue");
-  xmlDocOutput.RootElement()->InsertEndChild(nodeSetting);
-
+  // Create comment
+  TiXmlComment * comment = new TiXmlComment();
+  comment->SetValue(" Converted from xbmc strings.xml file " );
+  xmlDocOutput.LinkEndChild(comment);
+  //create node called xliff
+  TiXmlElement* nodexliff = new TiXmlElement("xliff");
+  xmlDocOutput.LinkEndChild(nodexliff);
+  nodexliff->SetAttribute("version", "1.1");
+  //create node called file
+  TiXmlElement* nodefile = new TiXmlElement("file");
+  nodexliff->LinkEndChild(nodefile);
+  nodefile->SetAttribute("original", "strings.xml");
+  nodefile->SetAttribute("source-language", "en-US");
+  nodefile->SetAttribute("datatype", "plaintext");
 
   const TiXmlElement *pChildInput = pRootElementInput->FirstChildElement("string");
   const char* attrIdInput = NULL;
@@ -79,8 +87,14 @@ int main(int argc, char* argv[])
     attrIdInput=pChildInput->Attribute("id");
     if (attrIdInput && !pChildInput->NoChildren())
     {
-      int id = atoi(attrIdInput);
-      std::cout << attrIdInput << pChildInput->FirstChild()->Value() << std::endl;
+      //create node trans-unit
+      TiXmlElement* nodetransunit = new TiXmlElement("trans-unit");
+      nodefile->LinkEndChild(nodetransunit);
+      nodetransunit->SetAttribute("id", attrIdInput);
+      //create node source with value
+      TiXmlElement* nodesource = new TiXmlElement("source");
+      nodesource->LinkEndChild(new TiXmlText(pChildInput->FirstChild()->Value()));
+      nodetransunit->LinkEndChild(nodesource);
     }
     pChildInput = pChildInput->NextSiblingElement("string");
   }
