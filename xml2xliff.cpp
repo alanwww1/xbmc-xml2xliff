@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
   // Initalize the output xml document
   TiXmlDocument xmlDocOutput;
   // Create header declaration line
-  TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf8", "" );
+  TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "UTF-8", "" );
   xmlDocOutput.LinkEndChild(decl);
   // Create comment
   TiXmlComment * comment = new TiXmlComment();
@@ -91,6 +91,11 @@ int main(int argc, char* argv[])
       TiXmlElement* nodetransunit = new TiXmlElement("trans-unit");
       nodefile->LinkEndChild(nodetransunit);
       nodetransunit->SetAttribute("id", attrIdInput);
+      //create node context-group id with value
+      TiXmlElement* nodecontextid = new TiXmlElement("context-group");
+      nodecontextid->SetAttribute("context-type", "id");
+      nodecontextid->LinkEndChild(new TiXmlText(attrIdInput));
+      nodetransunit->LinkEndChild(nodecontextid);
       //create node source with value
       TiXmlElement* nodesource = new TiXmlElement("source");
       nodesource->LinkEndChild(new TiXmlText(pChildInput->FirstChild()->Value()));
