@@ -35,6 +35,8 @@
 
 #include "tinyxml.h"
 #include "iostream"
+#include <map>
+#include <string>
 
   
 int main(int argc, char* argv[])
@@ -60,6 +62,23 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  std::multimap<std::string, int> mapXmlData;
+
+  const TiXmlElement *pChildInput = pRootElementInput->FirstChildElement("string");
+  const char* pAttrIdInput = NULL;
+  const char* pValue = NULL;
+  while (pChildInput)
+  {
+    pAttrIdInput=pChildInput->Attribute("id");
+    if (pAttrIdInput && !pChildInput->NoChildren())
+    {
+      int id = atoi(pAttrIdInput);
+      pValue = pChildInput->FirstChild()->Value();
+      mapXmlData.insert(std::pair<std::string,int>( pValue,id));
+    }
+    pChildInput = pChildInput->NextSiblingElement("string");
+  }
+
   // Initalize the output xml document
   TiXmlDocument xmlDocOutput;
   // Create header declaration line
@@ -79,27 +98,42 @@ int main(int argc, char* argv[])
   nodefile->SetAttribute("original", "strings.xml");
   nodefile->SetAttribute("source-language", "en-US");
   nodefile->SetAttribute("datatype", "plaintext");
+  //create node called body
+  TiXmlElement* nodebody = new TiXmlElement("body");
+  nodefile->LinkEndChild(nodebody);
 
-  const TiXmlElement *pChildInput = pRootElementInput->FirstChildElement("string");
-  const char* attrIdInput = NULL;
+  pChildInput = pRootElementInput->FirstChildElement("string");
+  pAttrIdInput = NULL;
+  pValue = NULL;
   while (pChildInput)
   {
-    attrIdInput=pChildInput->Attribute("id");
-    if (attrIdInput && !pChildInput->NoChildren())
+    pAttrIdInput=pChildInput->Attribute("id");
+    if (pAttrIdInput && !pChildInput->NoChildren())
     {
+      int id=atoi(pAttrIdInput);
+      pValue = pChildInput->FirstChild()->Value();
+
       //create node trans-unit
       TiXmlElement* nodetransunit = new TiXmlElement("trans-unit");
-      nodefile->LinkEndChild(nodetransunit);
-      nodetransunit->SetAttribute("id", attrIdInput);
-      //create node context-group id with value
-      TiXmlElement* nodecontextid = new TiXmlElement("context-group");
-      nodecontextid->SetAttribute("context-type", "id");
-      nodecontextid->LinkEndChild(new TiXmlText(attrIdInput));
-      nodetransunit->LinkEndChild(nodecontextid);
+      nodebody->LinkEndChild(nodetransunit);
+      nodetransunit->SetAttribute("id", pAttrIdInput);
       //create node source with value
       TiXmlElement* nodesource = new TiXmlElement("source");
-      nodesource->LinkEndChild(new TiXmlText(pChildInput->FirstChild()->Value()));
+      nodesource->LinkEndChild(new TiXmlText( pValue));
       nodetransunit->LinkEndChild(nodesource);
+      // if we have multiple IDs for the same string value, we create a context node
+      if (mapXmlData.count( pValue) > 1)	// if we have multiple IDs for the same string value
+      {
+        //create node context-group id with value
+        TiXmlElement* nodecontextgroup = new TiXmlElement("context-group");
+        TiXmlElement* nodecontext = new TiXmlElement("context");
+        nodecontext->SetAttribute("context-type", "context");
+        char strContext[64];
+        sprintf(strContext,"Auto generated context for string id: %i", id);
+        nodecontext->LinkEndChild(new TiXmlText(strContext));
+        nodecontextgroup->LinkEndChild(nodecontext);
+        nodetransunit->LinkEndChild(nodecontextgroup);
+      }
     }
     pChildInput = pChildInput->NextSiblingElement("string");
   }
