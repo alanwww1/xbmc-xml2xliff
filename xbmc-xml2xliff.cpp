@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   // Initalize the output xml document
   TiXmlDocument xmlDocOutput;
   // Create header declaration line
-  TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "UTF-8", "" );
+  TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "" );
   xmlDocOutput.LinkEndChild(decl);
   // Create comment
   TiXmlComment * comment = new TiXmlComment();
@@ -105,6 +105,7 @@ int main(int argc, char* argv[])
   pChildInput = pRootElementInput->FirstChildElement("string");
   pAttrIdInput = NULL;
   pValue = NULL;
+  int previd = -1;
   while (pChildInput)
   {
     pAttrIdInput=pChildInput->Attribute("id");
@@ -112,6 +113,17 @@ int main(int argc, char* argv[])
     {
       int id=atoi(pAttrIdInput);
       pValue = pChildInput->FirstChild()->Value();
+
+      //create comment note if empty string or strings ids found
+      if (previd !=-1 && (id-previd >= 2))
+      {
+        TiXmlComment * comment = new TiXmlComment();
+        char stremptycomment[64];
+        if (id-previd == 2) sprintf(stremptycomment," Empty string with id %i ", id-1);
+        if (id-previd > 2) sprintf(stremptycomment," Empty strings from id %i to %i ", previd+1, id-1);
+        comment->SetValue(stremptycomment);
+        nodebody->LinkEndChild(comment);
+      }
 
       //create node trans-unit
       TiXmlElement* nodetransunit = new TiXmlElement("trans-unit");
@@ -129,11 +141,12 @@ int main(int argc, char* argv[])
         TiXmlElement* nodecontext = new TiXmlElement("context");
         nodecontext->SetAttribute("context-type", "context");
         char strContext[64];
-        sprintf(strContext,"Auto generated context for string id: %i", id);
+        sprintf(strContext,"Auto generated context for string id %i", id);
         nodecontext->LinkEndChild(new TiXmlText(strContext));
         nodecontextgroup->LinkEndChild(nodecontext);
         nodetransunit->LinkEndChild(nodecontextgroup);
       }
+      previd =id;
     }
     pChildInput = pChildInput->NextSiblingElement("string");
   }
@@ -144,6 +157,10 @@ int main(int argc, char* argv[])
     std::cout << xmlDocOutput.ErrorDesc() << " " << pOutputFilename << std::endl;
     return 1;
   }
+
+  // Free up the allocated memory
+  xmlDocInput.Clear();
+  xmlDocOutput.Clear();
 
 //std::cout << "success" << xmlDocInput.ErrorDesc(); 
 //  for(int i = 1; i < argc; i++)

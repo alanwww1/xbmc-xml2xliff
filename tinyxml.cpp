@@ -100,11 +100,11 @@ void TiXmlBase::EncodeString( const TIXML_STRING& str, TIXML_STRING* outString )
 			outString->append( entity[3].str, entity[3].strLength );
 			++i;
 		}
-		else if ( c == '\'' )
-		{
-			outString->append( entity[4].str, entity[4].strLength );
-			++i;
-		}
+//		else if ( c == '\'' )
+//		{
+//			outString->append( entity[4].str, entity[4].strLength );
+//			++i;
+//		}
 		else if ( c < 32 )
 		{
 			// Easy pass at non-alpha/numeric/symbol

@@ -1,6 +1,6 @@
 #****************************************************************************
 #
-# Makefile for xml2xliff
+# Makefile for xbmc-xml2xliff
 # Attila Jakosa (alanwww1), TeamXBMC
 # www.xbmc.org
 #
@@ -81,7 +81,7 @@ CXXFLAGS := ${CXXFLAGS} ${DEFS}
 # Targets of the build
 #****************************************************************************
 
-OUTPUT := xml2xliff
+OUTPUT := xbmc-xml2xliff
 
 all: ${OUTPUT}
 
@@ -90,7 +90,7 @@ all: ${OUTPUT}
 # Source files
 #****************************************************************************
 
-SRCS := tinyxml.cpp tinyxmlparser.cpp xml2xliff.cpp tinyxmlerror.cpp tinystr.cpp
+SRCS := tinyxml.cpp tinyxmlparser.cpp xbmc-xml2xliff.cpp tinyxmlerror.cpp tinystr.cpp
 
 # Add on the sources for libraries
 SRCS := ${SRCS}
